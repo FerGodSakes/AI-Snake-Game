@@ -274,7 +274,6 @@ function resetSnake(snake) {
         snake.body.push({ x: startX - i * GRID_SIZE, y: startY });
     }
     snake.direction = snake === player1 ? 'right' : 'left';
-    snake.score = 0;
     console.log(`${snake.name} reset. New position:`, snake.body[0]);
 }
 
