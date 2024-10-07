@@ -146,22 +146,24 @@ function startGameLoop() {
 
 // Update game state
 function update() {
-    console.log('Updating game state');
+    console.log('Updating game state. Current mode:', gameMode);
     if (isPaused) return;
 
-    console.log(`Player 1 position: ${JSON.stringify(player1.body[0])}`);
-    console.log(`Player 2 position: ${JSON.stringify(player2.body[0])}`);
+    console.log(`Player 1 (${player1.name}) position: ${JSON.stringify(player1.body[0])}`);
+    console.log(`Player 2 (${player2.name}) position: ${JSON.stringify(player2.body[0])}`);
     console.log(`Food position: ${JSON.stringify(food)}`);
+
+    if (gameMode === 'computerVsComputer') {
+        console.log('Updating AI for both players');
+        updateAI(player1);
+        updateAI(player2);
+    } else {
+        console.log('Updating AI for player 2 only');
+        updateAI(player2);
+    }
 
     moveSnake(player1);
     moveSnake(player2);
-
-    if (gameMode === 'humanVsComputer') {
-        updateAI(player2);
-    } else {
-        updateAI(player1);
-        updateAI(player2);
-    }
 
     checkCollisions(player1);
     checkCollisions(player2);
@@ -259,6 +261,7 @@ function updateAI(aiSnake) {
         else if (nextMove.x > head.x) aiSnake.direction = 'right';
         else if (nextMove.y < head.y) aiSnake.direction = 'up';
         else if (nextMove.y > head.y) aiSnake.direction = 'down';
+        console.log(`AI ${aiSnake.name} found path to food, moving ${aiSnake.direction}`);
     } else {
         // No clear path to food, focus on survival
         const safeDirections = ['up', 'down', 'left', 'right'].filter(dir => {
@@ -270,6 +273,7 @@ function updateAI(aiSnake) {
             // Occasionally make a random move for unpredictability
             if (Math.random() < 0.1) {
                 aiSnake.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+                console.log(`AI ${aiSnake.name} making random move: ${aiSnake.direction}`);
             } else {
                 // Choose the direction that leads to the most open space
                 const openSpaces = safeDirections.map(dir => {
@@ -279,12 +283,14 @@ function updateAI(aiSnake) {
                 const maxOpenSpace = Math.max(...openSpaces);
                 const bestDirections = safeDirections.filter((_, index) => openSpaces[index] === maxOpenSpace);
                 aiSnake.direction = bestDirections[Math.floor(Math.random() * bestDirections.length)];
+                console.log(`AI ${aiSnake.name} choosing direction with most open space: ${aiSnake.direction}`);
             }
+        } else {
+            console.log(`AI ${aiSnake.name} has no safe directions, keeping current direction: ${aiSnake.direction}`);
         }
-        // If no safe directions, keep current direction (will likely result in game over)
     }
 
-    console.log(`AI ${aiSnake.name} chose direction: ${aiSnake.direction}`);
+    console.log(`AI ${aiSnake.name} final direction: ${aiSnake.direction}`);
 }
 
 // Helper function to count open spaces in a given direction
@@ -454,7 +460,6 @@ function changeGameMode() {
     gameMode = document.getElementById('gameModeSelect').value;
     console.log('Game mode changed to:', gameMode);
     
-    // Update player names based on the new game mode
     if (gameMode === 'computerVsComputer') {
         player1.name = 'AI Green';
         player2.name = 'AI Red';
@@ -463,7 +468,7 @@ function changeGameMode() {
         player2.name = 'AI';
     }
     
-    // Restart the game with the new mode
+    console.log('Player names updated:', player1.name, player2.name);
     restartGame();
 }
 
