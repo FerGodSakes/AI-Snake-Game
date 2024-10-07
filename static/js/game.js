@@ -169,9 +169,15 @@ function moveSnake(snake) {
     snake.body.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
+        console.log(`${snake.name} is at (${head.x}, ${head.y}), food is at (${food.x}, ${food.y})`);
         snake.score += FOOD_VALUE;
-        console.log(`${snake.name} ate food. New score:`, snake.score);
+        console.log(`${snake.name} ate food. New score: ${snake.score}`);
+        // Don't remove the last segment to make the snake grow
         createFood();
+        // Increase speed
+        gameSpeed = Math.min(gameSpeed + 0.5, 10);
+        clearInterval(gameLoop);
+        startGameLoop();
     } else {
         snake.body.pop();
     }
@@ -179,8 +185,9 @@ function moveSnake(snake) {
 
 // Update AI player
 function updateAI(aiSnake) {
-    console.log(`Updating AI for ${aiSnake.name}`);
     const head = aiSnake.body[0];
+    console.log(`AI ${aiSnake.name} current position: (${head.x}, ${head.y}), food at: (${food.x}, ${food.y})`);
+
     const dx = food.x - head.x;
     const dy = food.y - head.y;
 
@@ -190,48 +197,37 @@ function updateAI(aiSnake) {
         aiSnake.direction = dy > 0 ? 'down' : 'up';
     }
 
-    // Avoid collisions
-    const nextHead = { x: head.x, y: head.y };
-    switch (aiSnake.direction) {
-        case 'up':
-            nextHead.y -= GRID_SIZE;
-            break;
-        case 'down':
-            nextHead.y += GRID_SIZE;
-            break;
-        case 'left':
-            nextHead.x -= GRID_SIZE;
-            break;
-        case 'right':
-            nextHead.x += GRID_SIZE;
-            break;
-    }
+    console.log(`AI ${aiSnake.name} chose direction: ${aiSnake.direction}`);
 
-    if (isCollision(nextHead, aiSnake)) {
-        const directions = ['up', 'down', 'left', 'right'];
-        const safeDirections = directions.filter(dir => {
-            const testHead = { x: head.x, y: head.y };
-            switch (dir) {
-                case 'up':
-                    testHead.y -= GRID_SIZE;
-                    break;
-                case 'down':
-                    testHead.y += GRID_SIZE;
-                    break;
-                case 'left':
-                    testHead.x -= GRID_SIZE;
-                    break;
-                case 'right':
-                    testHead.x += GRID_SIZE;
-                    break;
-            }
+    // Ensure AI movement
+    const nextHead = getNextPosition(aiSnake);
+    if (!isCollision(nextHead, aiSnake)) {
+        aiSnake.body.unshift(nextHead);
+        aiSnake.body.pop();
+    } else {
+        console.log(`AI ${aiSnake.name} avoided collision, choosing new direction`);
+        // Implement simple collision avoidance
+        const safeDirections = ['up', 'down', 'left', 'right'].filter(dir => {
+            const testHead = getNextPosition(aiSnake, dir);
             return !isCollision(testHead, aiSnake);
         });
-
         if (safeDirections.length > 0) {
             aiSnake.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
         }
     }
+}
+
+// Helper function to get next position
+function getNextPosition(snake, dir = snake.direction) {
+    const head = snake.body[0];
+    const nextHead = { x: head.x, y: head.y };
+    switch (dir) {
+        case 'up': nextHead.y -= GRID_SIZE; break;
+        case 'down': nextHead.y += GRID_SIZE; break;
+        case 'left': nextHead.x -= GRID_SIZE; break;
+        case 'right': nextHead.x += GRID_SIZE; break;
+    }
+    return nextHead;
 }
 
 // Check for collisions
