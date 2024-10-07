@@ -28,16 +28,32 @@ function init() {
 
     initializePlayers();
 
-    // Set up event listeners
-    document.addEventListener('keydown', handleKeyPress);
-    document.getElementById('pauseBtn').addEventListener('click', togglePause);
-    document.getElementById('restartBtn').addEventListener('click', restartGame);
-    document.getElementById('newGameBtn').addEventListener('click', startGame);
-    document.getElementById('playAgainBtn').addEventListener('click', restartGame);
-    document.getElementById('speedSlider').addEventListener('input', updateGameSpeed);
-    document.getElementById('gameModeSelect').addEventListener('change', changeGameMode);
+    // Set up event listeners with error handling
+    try {
+        document.addEventListener('keydown', handleKeyPress);
+        
+        const elements = [
+            { id: 'pauseBtn', event: 'click', handler: togglePause },
+            { id: 'restartBtn', event: 'click', handler: restartGame },
+            { id: 'newGameBtn', event: 'click', handler: startGame },
+            { id: 'playAgainBtn', event: 'click', handler: restartGame },
+            { id: 'speedSlider', event: 'input', handler: updateGameSpeed },
+            { id: 'gameModeSelect', event: 'change', handler: changeGameMode }
+        ];
 
-    console.log('Event listeners set up');
+        elements.forEach(({ id, event, handler }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(event, handler);
+            } else {
+                console.error(`Element with id '${id}' not found`);
+            }
+        });
+
+        console.log('Event listeners set up successfully');
+    } catch (error) {
+        console.error('Error setting up event listeners:', error);
+    }
 
     // Start the game
     startGame();
@@ -508,5 +524,9 @@ function endGame() {
     document.getElementById('game-over').classList.remove('hidden');
 }
 
-// Start the game
-document.addEventListener('DOMContentLoaded', init);
+// Ensure that the DOM is fully loaded before initializing the game
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
