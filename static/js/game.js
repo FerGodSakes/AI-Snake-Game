@@ -241,7 +241,7 @@ function checkCollisions(snake) {
 
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
-        snake.score -= COLLISION_PENALTY;
+        snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
         console.log(`${snake.name} hit wall. New score:`, snake.score);
         resetSnake(snake);
     }
@@ -249,7 +249,7 @@ function checkCollisions(snake) {
     // Self collision
     for (let i = 1; i < snake.body.length; i++) {
         if (head.x === snake.body[i].x && head.y === snake.body[i].y) {
-            snake.score -= COLLISION_PENALTY;
+            snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
             console.log(`${snake.name} hit itself. New score:`, snake.score);
             resetSnake(snake);
             break;
@@ -260,7 +260,7 @@ function checkCollisions(snake) {
     const otherSnake = snake === player1 ? player2 : player1;
     for (const segment of otherSnake.body) {
         if (head.x === segment.x && head.y === segment.y) {
-            snake.score -= COLLISION_PENALTY;
+            snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
             console.log(`${snake.name} hit other snake. New score:`, snake.score);
             resetSnake(snake);
             break;
@@ -277,6 +277,7 @@ function resetSnake(snake) {
         snake.body.push({ x: startX - i * GRID_SIZE, y: startY });
     }
     snake.direction = snake === player1 ? 'right' : 'left';
+    snake.score = 0;
     console.log(`${snake.name} reset. New position:`, snake.body[0]);
 }
 
@@ -362,7 +363,7 @@ function changeGameMode() {
 // End game
 function endGame() {
     clearInterval(gameLoop);
-    const winner = player1.score >= 0 ? player1.name : player2.name;
+    const winner = player1.score > player2.score ? player1.name : player2.name;
     console.log('Game over. Winner:', winner);
     document.getElementById('winner').innerHTML = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
