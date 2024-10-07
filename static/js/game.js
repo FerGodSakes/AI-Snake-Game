@@ -39,6 +39,7 @@ function init() {
     document.addEventListener('keydown', handleKeyPress);
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
     document.getElementById('restartBtn').addEventListener('click', restartGame);
+    document.getElementById('newGameBtn').addEventListener('click', startGame);
     document.getElementById('playAgainBtn').addEventListener('click', restartGame);
     document.getElementById('speedSlider').addEventListener('input', updateGameSpeed);
     document.getElementById('gameModeSelect').addEventListener('change', changeGameMode);
@@ -81,8 +82,28 @@ function startGame() {
     // Clear any existing game loop
     clearInterval(gameLoop);
 
-    // Start game loop
-    startGameLoop();
+    // Start countdown
+    startCountdown();
+}
+
+// Countdown function
+function startCountdown() {
+    let count = 3;
+    const countdownInterval = setInterval(() => {
+        if (count > 0) {
+            // Clear canvas and draw countdown
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillStyle = 'black';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(count, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+            count--;
+        } else {
+            clearInterval(countdownInterval);
+            startGameLoop();
+        }
+    }, 1000);
 }
 
 // Create food at random position
@@ -188,32 +209,49 @@ function updateAI(aiSnake) {
     const head = aiSnake.body[0];
     console.log(`AI ${aiSnake.name} current position: (${head.x}, ${head.y}), food at: (${food.x}, ${food.y})`);
 
-    const dx = food.x - head.x;
-    const dy = food.y - head.y;
+    // Get all possible directions
+    const directions = ['up', 'down', 'left', 'right'];
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-        aiSnake.direction = dx > 0 ? 'right' : 'left';
-    } else {
-        aiSnake.direction = dy > 0 ? 'down' : 'up';
-    }
+    // Calculate distances to food for each direction
+    const distances = directions.map(dir => {
+        const nextHead = getNextPosition(aiSnake, dir);
+        return {
+            direction: dir,
+            distance: Math.abs(nextHead.x - food.x) + Math.abs(nextHead.y - food.y),
+            collision: isCollision(nextHead, aiSnake)
+        };
+    });
+
+    // Sort directions by distance (ascending) and collision (false first)
+    distances.sort((a, b) => {
+        if (a.collision !== b.collision) {
+            return a.collision ? 1 : -1;
+        }
+        return a.distance - b.distance;
+    });
+
+    // Choose the best direction (closest to food without collision)
+    const bestDirection = distances[0].direction;
+
+    // Update snake direction
+    aiSnake.direction = bestDirection;
 
     console.log(`AI ${aiSnake.name} chose direction: ${aiSnake.direction}`);
 
-    // Ensure AI movement
+    // Move the snake
     const nextHead = getNextPosition(aiSnake);
-    if (!isCollision(nextHead, aiSnake)) {
-        aiSnake.body.unshift(nextHead);
-        aiSnake.body.pop();
+    aiSnake.body.unshift(nextHead);
+    
+    // Check if food is eaten
+    if (nextHead.x === food.x && nextHead.y === food.y) {
+        aiSnake.score += FOOD_VALUE;
+        console.log(`${aiSnake.name} ate food. New score: ${aiSnake.score}`);
+        createFood();
+        gameSpeed = Math.min(gameSpeed + 0.5, 10);
+        clearInterval(gameLoop);
+        startGameLoop();
     } else {
-        console.log(`AI ${aiSnake.name} avoided collision, choosing new direction`);
-        // Implement simple collision avoidance
-        const safeDirections = ['up', 'down', 'left', 'right'].filter(dir => {
-            const testHead = getNextPosition(aiSnake, dir);
-            return !isCollision(testHead, aiSnake);
-        });
-        if (safeDirections.length > 0) {
-            aiSnake.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
-        }
+        aiSnake.body.pop();
     }
 }
 
@@ -370,9 +408,9 @@ function changeGameMode() {
 // End game
 function endGame() {
     clearInterval(gameLoop);
-    const winner = player1.score > player2.score ? player1.name : player2.name;
+    const winner = player1.score > player2.score ? player1.name : (player2.score > player1.score ? player2.name : "It's a tie");
     console.log('Game over. Winner:', winner);
-    document.getElementById('winner').innerHTML = `${winner} wins!`;
+    document.getElementById('winner').innerHTML = winner === "It's a tie" ? "It's a tie!" : `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
 }
 
