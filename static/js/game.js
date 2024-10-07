@@ -13,6 +13,7 @@ let food;
 let gameLoop;
 let isPaused = false;
 let gameSpeed = 5;
+let gameMode = 'humanVsComputer'; // New variable to track game mode
 
 // Initialize game
 function init() {
@@ -22,9 +23,14 @@ function init() {
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 
-    // Initialize players
-    player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right');
-    player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left');
+    // Initialize players based on game mode
+    if (gameMode === 'humanVsComputer') {
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
+    } else {
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'AI 1');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI 2');
+    }
 
     console.log('Player 1 initial state:', player1);
     console.log('Player 2 initial state:', player2);
@@ -38,6 +44,7 @@ function init() {
     document.getElementById('restartBtn').addEventListener('click', restartGame);
     document.getElementById('playAgainBtn').addEventListener('click', restartGame);
     document.getElementById('speedSlider').addEventListener('input', updateGameSpeed);
+    document.getElementById('gameModeSelect').addEventListener('change', changeGameMode);
 
     console.log('Event listeners set up');
 
@@ -46,12 +53,13 @@ function init() {
 }
 
 // Create snake object
-function createSnake(x, y, color, direction) {
+function createSnake(x, y, color, direction, name) {
     const snake = {
         body: [],
         color: color,
         direction: direction,
-        score: 0
+        score: 0,
+        name: name
     };
 
     for (let i = 0; i < INITIAL_SNAKE_LENGTH; i++) {
@@ -73,19 +81,21 @@ function createFood() {
 // Handle keyboard input
 function handleKeyPress(e) {
     console.log('Key pressed:', e.key);
-    switch (e.key) {
-        case 'ArrowUp':
-            if (player1.direction !== 'down') player1.direction = 'up';
-            break;
-        case 'ArrowDown':
-            if (player1.direction !== 'up') player1.direction = 'down';
-            break;
-        case 'ArrowLeft':
-            if (player1.direction !== 'right') player1.direction = 'left';
-            break;
-        case 'ArrowRight':
-            if (player1.direction !== 'left') player1.direction = 'right';
-            break;
+    if (gameMode === 'humanVsComputer') {
+        switch (e.key) {
+            case 'ArrowUp':
+                if (player1.direction !== 'down') player1.direction = 'up';
+                break;
+            case 'ArrowDown':
+                if (player1.direction !== 'up') player1.direction = 'down';
+                break;
+            case 'ArrowLeft':
+                if (player1.direction !== 'right') player1.direction = 'left';
+                break;
+            case 'ArrowRight':
+                if (player1.direction !== 'left') player1.direction = 'right';
+                break;
+        }
     }
 }
 
@@ -97,11 +107,18 @@ function startGameLoop() {
 
 // Update game state
 function update() {
+    console.log('Updating game state');
     if (isPaused) return;
 
     moveSnake(player1);
     moveSnake(player2);
-    updateAI(player2);
+
+    if (gameMode === 'humanVsComputer') {
+        updateAI(player2);
+    } else {
+        updateAI(player1);
+        updateAI(player2);
+    }
 
     checkCollisions(player1);
     checkCollisions(player2);
@@ -115,6 +132,7 @@ function update() {
 
 // Move snake
 function moveSnake(snake) {
+    console.log(`Moving ${snake.name}`);
     const head = { x: snake.body[0].x, y: snake.body[0].y };
 
     switch (snake.direction) {
@@ -136,7 +154,7 @@ function moveSnake(snake) {
 
     if (head.x === food.x && head.y === food.y) {
         snake.score += FOOD_VALUE;
-        console.log(`${snake.color} snake ate food. New score:`, snake.score);
+        console.log(`${snake.name} ate food. New score:`, snake.score);
         createFood();
     } else {
         snake.body.pop();
@@ -145,6 +163,7 @@ function moveSnake(snake) {
 
 // Update AI player
 function updateAI(aiSnake) {
+    console.log(`Updating AI for ${aiSnake.name}`);
     const head = aiSnake.body[0];
     const dx = food.x - head.x;
     const dy = food.y - head.y;
@@ -201,12 +220,13 @@ function updateAI(aiSnake) {
 
 // Check for collisions
 function checkCollisions(snake) {
+    console.log(`Checking collisions for ${snake.name}`);
     const head = snake.body[0];
 
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
         snake.score -= COLLISION_PENALTY;
-        console.log(`${snake.color} snake hit wall. New score:`, snake.score);
+        console.log(`${snake.name} hit wall. New score:`, snake.score);
         resetSnake(snake);
     }
 
@@ -214,7 +234,7 @@ function checkCollisions(snake) {
     for (let i = 1; i < snake.body.length; i++) {
         if (head.x === snake.body[i].x && head.y === snake.body[i].y) {
             snake.score -= COLLISION_PENALTY;
-            console.log(`${snake.color} snake hit itself. New score:`, snake.score);
+            console.log(`${snake.name} hit itself. New score:`, snake.score);
             resetSnake(snake);
             break;
         }
@@ -225,7 +245,7 @@ function checkCollisions(snake) {
     for (const segment of otherSnake.body) {
         if (head.x === segment.x && head.y === segment.y) {
             snake.score -= COLLISION_PENALTY;
-            console.log(`${snake.color} snake hit other snake. New score:`, snake.score);
+            console.log(`${snake.name} hit other snake. New score:`, snake.score);
             resetSnake(snake);
             break;
         }
@@ -241,7 +261,7 @@ function resetSnake(snake) {
         snake.body.push({ x: startX - i * GRID_SIZE, y: startY });
     }
     snake.direction = snake === player1 ? 'right' : 'left';
-    console.log(`${snake.color} snake reset. New position:`, snake.body[0]);
+    console.log(`${snake.name} reset. New position:`, snake.body[0]);
 }
 
 // Check if a position collides with a snake
@@ -281,8 +301,8 @@ function draw() {
     ctx.fillRect(food.x, food.y, GRID_SIZE, GRID_SIZE);
 
     // Update scores
-    document.getElementById('player1-score').textContent = `Player 1: ${player1.score}`;
-    document.getElementById('player2-score').textContent = `Player 2: ${player2.score}`;
+    document.getElementById('player1-score').textContent = `${player1.name}: ${player1.score}`;
+    document.getElementById('player2-score').textContent = `${player2.name}: ${player2.score}`;
 }
 
 // Draw snake
@@ -316,10 +336,17 @@ function updateGameSpeed() {
     startGameLoop();
 }
 
+// Change game mode
+function changeGameMode() {
+    gameMode = document.getElementById('gameModeSelect').value;
+    console.log('Game mode changed to:', gameMode);
+    restartGame();
+}
+
 // End game
 function endGame() {
     clearInterval(gameLoop);
-    const winner = player1.score >= 0 ? 'Player 1' : 'Player 2';
+    const winner = player1.score >= 0 ? player1.name : player2.name;
     console.log('Game over. Winner:', winner);
     document.getElementById('winner').textContent = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');

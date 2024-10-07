@@ -14,11 +14,20 @@
                 <div id="player1-score">Player 1: 0</div>
                 <div id="player2-score">Player 2: 0</div>
             </div>
-            <button id="pauseBtn">Pause</button>
-            <button id="restartBtn">Restart</button>
-            <div id="speed-settings">
-                <label for="speedSlider">Initial Speed:</label>
-                <input type="range" id="speedSlider" min="1" max="10" value="5">
+            <div id="game-controls">
+                <button id="pauseBtn">Pause</button>
+                <button id="restartBtn">Restart</button>
+                <div id="speed-settings">
+                    <label for="speedSlider">Initial Speed:</label>
+                    <input type="range" id="speedSlider" min="1" max="10" value="5">
+                </div>
+                <div id="mode-selection">
+                    <label for="gameModeSelect">Game Mode:</label>
+                    <select id="gameModeSelect">
+                        <option value="humanVsComputer">Human vs. Computer</option>
+                        <option value="computerVsComputer">Computer vs. Computer</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div id="game-over" class="hidden">
