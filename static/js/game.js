@@ -26,16 +26,7 @@ function init() {
     gameMode = document.getElementById('gameModeSelect').value;
     console.log('Initial game mode:', gameMode);
 
-    if (gameMode === 'humanVsComputer') {
-        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
-        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
-    } else {
-        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'AI Green');
-        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI Red');
-    }
-
-    console.log('Player 1 initial state:', player1);
-    console.log('Player 2 initial state:', player2);
+    initializePlayers();
 
     // Set up event listeners
     document.addEventListener('keydown', handleKeyPress);
@@ -50,6 +41,19 @@ function init() {
 
     // Start the game
     startGame();
+}
+
+// Initialize players based on game mode
+function initializePlayers() {
+    if (gameMode === 'humanVsComputer') {
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
+    } else {
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'AI Green');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI Red');
+    }
+
+    console.log('Players initialized:', player1, player2);
 }
 
 // Create snake object
@@ -423,6 +427,8 @@ function draw() {
     // Update scores
     document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
     document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
+
+    console.log('Game state drawn. Player names:', player1.name, player2.name);
 }
 
 // Draw snake
@@ -451,6 +457,7 @@ function togglePause() {
 function restartGame() {
     console.log('Restarting game...');
     clearInterval(gameLoop);
+    initializePlayers();
     startGame();
     document.getElementById('game-over').classList.add('hidden');
 }
@@ -477,6 +484,11 @@ function changeGameMode() {
     }
     
     console.log('Player names updated:', player1.name, player2.name);
+    
+    // Force a redraw of the game state
+    draw();
+    
+    // Restart the game with the new mode
     restartGame();
 }
 
