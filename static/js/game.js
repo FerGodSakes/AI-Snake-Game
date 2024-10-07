@@ -13,7 +13,7 @@ let food;
 let gameLoop;
 let isPaused = false;
 let gameSpeed = 5;
-let gameMode = 'humanVsComputer'; // New variable to track game mode
+let gameMode = 'humanVsComputer';
 
 // Initialize game
 function init() {
@@ -28,15 +28,12 @@ function init() {
         player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
         player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
     } else {
-        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'AI 1');
-        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI 2');
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', '<span style="color: green;">AI Green</span>');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', '<span style="color: red;">AI Red</span>');
     }
 
     console.log('Player 1 initial state:', player1);
     console.log('Player 2 initial state:', player2);
-
-    // Create initial food
-    createFood();
 
     // Set up event listeners
     document.addEventListener('keydown', handleKeyPress);
@@ -48,8 +45,8 @@ function init() {
 
     console.log('Event listeners set up');
 
-    // Start game loop
-    startGameLoop();
+    // Start the game
+    startGame();
 }
 
 // Create snake object
@@ -67,6 +64,25 @@ function createSnake(x, y, color, direction, name) {
     }
 
     return snake;
+}
+
+// Start game
+function startGame() {
+    console.log('Starting game...');
+    // Reset snake positions and scores
+    resetSnake(player1);
+    resetSnake(player2);
+    player1.score = 0;
+    player2.score = 0;
+
+    // Create new food
+    createFood();
+
+    // Clear any existing game loop
+    clearInterval(gameLoop);
+
+    // Start game loop
+    startGameLoop();
 }
 
 // Create food at random position
@@ -301,8 +317,8 @@ function draw() {
     ctx.fillRect(food.x, food.y, GRID_SIZE, GRID_SIZE);
 
     // Update scores
-    document.getElementById('player1-score').textContent = `${player1.name}: ${player1.score}`;
-    document.getElementById('player2-score').textContent = `${player2.name}: ${player2.score}`;
+    document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
+    document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
 }
 
 // Draw snake
@@ -324,7 +340,7 @@ function togglePause() {
 function restartGame() {
     console.log('Restarting game...');
     clearInterval(gameLoop);
-    init();
+    startGame();
     document.getElementById('game-over').classList.add('hidden');
 }
 
@@ -348,7 +364,7 @@ function endGame() {
     clearInterval(gameLoop);
     const winner = player1.score >= 0 ? player1.name : player2.name;
     console.log('Game over. Winner:', winner);
-    document.getElementById('winner').textContent = `${winner} wins!`;
+    document.getElementById('winner').innerHTML = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
 }
 
