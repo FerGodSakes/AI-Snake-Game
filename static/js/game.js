@@ -122,7 +122,6 @@ function moveSnake(snake) {
 
     if (head.x === food.x && head.y === food.y) {
         snake.score += FOOD_VALUE;
-        playSound('eat');
         createFood();
     } else {
         snake.body.pop();
@@ -192,7 +191,6 @@ function checkCollisions(snake) {
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
         snake.score -= COLLISION_PENALTY;
-        playSound('collision');
         resetSnake(snake);
     }
 
@@ -200,7 +198,6 @@ function checkCollisions(snake) {
     for (let i = 1; i < snake.body.length; i++) {
         if (head.x === snake.body[i].x && head.y === snake.body[i].y) {
             snake.score -= COLLISION_PENALTY;
-            playSound('collision');
             resetSnake(snake);
             break;
         }
@@ -211,7 +208,6 @@ function checkCollisions(snake) {
     for (const segment of otherSnake.body) {
         if (head.x === segment.x && head.y === segment.y) {
             snake.score -= COLLISION_PENALTY;
-            playSound('collision');
             resetSnake(snake);
             break;
         }
@@ -304,14 +300,7 @@ function endGame() {
     const winner = player1.score >= 0 ? 'Player 1' : 'Player 2';
     document.getElementById('winner').textContent = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
-    playSound('game_over');
-}
-
-// Play sound effect
-function playSound(soundName) {
-    const audio = new Audio(`/static/audio/${soundName}.mp3`);
-    audio.play();
 }
 
 // Start the game
-init();
+document.addEventListener('DOMContentLoaded', init);
