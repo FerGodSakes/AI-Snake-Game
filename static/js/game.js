@@ -173,7 +173,6 @@ function moveSnake(snake) {
         snake.score += FOOD_VALUE;
         console.log(`${snake.name} ate food. New score: ${snake.score}`);
         // Don't remove the last segment to make the snake grow
-        snake.body.push({}); // Add a new segment
         createFood(); // Create new food immediately
         // Increase speed
         gameSpeed = Math.min(gameSpeed + 0.5, 10);
@@ -312,7 +311,7 @@ function draw() {
     drawSnake(player2);
 
     // Draw food
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = 'blue';
     ctx.fillRect(food.x, food.y, GRID_SIZE, GRID_SIZE);
 
     // Update scores
