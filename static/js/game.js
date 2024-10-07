@@ -169,17 +169,17 @@ function moveSnake(snake) {
     snake.body.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
-        console.log(`${snake.name} is at (${head.x}, ${head.y}), food is at (${food.x}, ${food.y})`);
+        console.log(`${snake.name} is eating food at (${food.x}, ${food.y})`);
         snake.score += FOOD_VALUE;
         console.log(`${snake.name} ate food. New score: ${snake.score}`);
         // Don't remove the last segment to make the snake grow
-        createFood();
+        createFood(); // Create new food immediately
         // Increase speed
         gameSpeed = Math.min(gameSpeed + 0.5, 10);
         clearInterval(gameLoop);
         startGameLoop();
     } else {
-        snake.body.pop();
+        snake.body.pop(); // Remove last segment only if food wasn't eaten
     }
 }
 
