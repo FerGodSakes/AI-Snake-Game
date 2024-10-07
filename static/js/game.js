@@ -28,8 +28,8 @@ function init() {
         player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
         player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
     } else {
-        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', '<span style="color: green;">AI Green</span>');
-        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', '<span style="color: red;">AI Red</span>');
+        player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'AI Green');
+        player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI Red');
     }
 
     console.log('Player 1 initial state:', player1);
@@ -313,8 +313,13 @@ function draw() {
     ctx.fillRect(food.x, food.y, GRID_SIZE, GRID_SIZE);
 
     // Update scores
-    document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
-    document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
+    if (gameMode === 'computerVsComputer') {
+        document.getElementById('player1-score').innerHTML = `<span style="color: green;">AI Green</span>: ${player1.score}`;
+        document.getElementById('player2-score').innerHTML = `<span style="color: red;">AI Red</span>: ${player2.score}`;
+    } else {
+        document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
+        document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
+    }
 }
 
 // Draw snake
