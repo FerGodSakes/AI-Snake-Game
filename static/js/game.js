@@ -173,11 +173,13 @@ function moveSnake(snake) {
         snake.score += FOOD_VALUE;
         console.log(`${snake.name} ate food. New score: ${snake.score}`);
         // Don't remove the last segment to make the snake grow
+        snake.body.push({}); // Add a new segment
         createFood(); // Create new food immediately
         // Increase speed
         gameSpeed = Math.min(gameSpeed + 0.5, 10);
         clearInterval(gameLoop);
         startGameLoop();
+        console.log(`${snake.name} grew. New length: ${snake.body.length}`);
     } else {
         snake.body.pop(); // Remove last segment only if food wasn't eaten
     }
@@ -321,8 +323,15 @@ function draw() {
 // Draw snake
 function drawSnake(snake) {
     ctx.fillStyle = snake.color;
-    for (const segment of snake.body) {
-        ctx.fillRect(segment.x, segment.y, GRID_SIZE, GRID_SIZE);
+    for (let i = 0; i < snake.body.length; i++) {
+        const segment = snake.body[i];
+        if (i === 0) {
+            // Draw the head
+            ctx.fillRect(segment.x, segment.y, GRID_SIZE, GRID_SIZE);
+        } else {
+            // Draw the body segments with a slight size reduction for visual effect
+            ctx.fillRect(segment.x + 1, segment.y + 1, GRID_SIZE - 2, GRID_SIZE - 2);
+        }
     }
 }
 
