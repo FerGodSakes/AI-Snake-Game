@@ -23,7 +23,9 @@ function init() {
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 
-    // Initialize players based on game mode
+    gameMode = document.getElementById('gameModeSelect').value;
+    console.log('Initial game mode:', gameMode);
+
     if (gameMode === 'humanVsComputer') {
         player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right', 'Human');
         player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left', 'AI');
@@ -283,9 +285,6 @@ function updateAI(aiSnake) {
     }
 
     console.log(`AI ${aiSnake.name} chose direction: ${aiSnake.direction}`);
-
-    // Move the snake
-    moveSnake(aiSnake);
 }
 
 // Helper function to count open spaces in a given direction
@@ -408,13 +407,8 @@ function draw() {
     ctx.fillRect(food.x, food.y, GRID_SIZE, GRID_SIZE);
 
     // Update scores
-    if (gameMode === 'computerVsComputer') {
-        document.getElementById('player1-score').innerHTML = `<span style="color: green;">AI Green</span>: ${player1.score}`;
-        document.getElementById('player2-score').innerHTML = `<span style="color: red;">AI Red</span>: ${player2.score}`;
-    } else {
-        document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
-        document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
-    }
+    document.getElementById('player1-score').innerHTML = `${player1.name}: ${player1.score}`;
+    document.getElementById('player2-score').innerHTML = `${player2.name}: ${player2.score}`;
 }
 
 // Draw snake
@@ -459,6 +453,17 @@ function updateGameSpeed() {
 function changeGameMode() {
     gameMode = document.getElementById('gameModeSelect').value;
     console.log('Game mode changed to:', gameMode);
+    
+    // Update player names based on the new game mode
+    if (gameMode === 'computerVsComputer') {
+        player1.name = 'AI Green';
+        player2.name = 'AI Red';
+    } else {
+        player1.name = 'Human';
+        player2.name = 'AI';
+    }
+    
+    // Restart the game with the new mode
     restartGame();
 }
 
