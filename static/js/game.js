@@ -338,25 +338,26 @@ function checkCollisions(snake) {
     console.log(`Checking collisions for ${snake.name}`);
     const head = snake.body[0];
 
-    // Check if score is below 0
-    if (snake.score < 0) {
-        console.log(`${snake.name}'s score dropped below 0. Ending game.`);
-        endGame();
-        return; // Exit the function to prevent further checks
-    }
-
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
-        snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
+        snake.score -= COLLISION_PENALTY;
         console.log(`${snake.name} hit wall. New score:`, snake.score);
+        if (snake.score < 0) {
+            endGame();
+            return;
+        }
         resetSnake(snake);
     }
 
     // Self collision
     for (let i = 1; i < snake.body.length; i++) {
         if (head.x === snake.body[i].x && head.y === snake.body[i].y) {
-            snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
+            snake.score -= COLLISION_PENALTY;
             console.log(`${snake.name} hit itself. New score:`, snake.score);
+            if (snake.score < 0) {
+                endGame();
+                return;
+            }
             resetSnake(snake);
             break;
         }
@@ -366,8 +367,12 @@ function checkCollisions(snake) {
     const otherSnake = snake === player1 ? player2 : player1;
     for (const segment of otherSnake.body) {
         if (head.x === segment.x && head.y === segment.y) {
-            snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
+            snake.score -= COLLISION_PENALTY;
             console.log(`${snake.name} hit other snake. New score:`, snake.score);
+            if (snake.score < 0) {
+                endGame();
+                return;
+            }
             resetSnake(snake);
             break;
         }
@@ -484,10 +489,10 @@ function endGame() {
     } else if (player2.score < 0) {
         winner = player1.name;
     } else {
-        winner = player1.score > player2.score ? player1.name : (player2.score > player1.score ? player2.name : "It's a tie");
+        winner = player1.score > player2.score ? player1.name : player2.name;
     }
     console.log('Game over. Winner:', winner);
-    document.getElementById('winner').innerHTML = winner === "It's a tie" ? "It's a tie!" : `${winner} wins!`;
+    document.getElementById('winner').innerHTML = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
 }
 
