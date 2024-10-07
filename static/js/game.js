@@ -156,23 +156,19 @@ function moveSnake(snake) {
     const head = { x: snake.body[0].x, y: snake.body[0].y };
 
     switch (snake.direction) {
-        case 'up':
-            head.y -= GRID_SIZE;
-            break;
-        case 'down':
-            head.y += GRID_SIZE;
-            break;
-        case 'left':
-            head.x -= GRID_SIZE;
-            break;
-        case 'right':
-            head.x += GRID_SIZE;
-            break;
+        case 'up': head.y -= GRID_SIZE; break;
+        case 'down': head.y += GRID_SIZE; break;
+        case 'left': head.x -= GRID_SIZE; break;
+        case 'right': head.x += GRID_SIZE; break;
     }
 
     snake.body.unshift(head);
 
-    if (head.x === food.x && head.y === food.y) {
+    // Debug log
+    console.log(`Snake head at (${head.x}, ${head.y}), food at (${food.x}, ${food.y})`);
+
+    // More forgiving collision detection
+    if (Math.abs(head.x - food.x) < GRID_SIZE && Math.abs(head.y - food.y) < GRID_SIZE) {
         console.log(`${snake.name} is eating food at (${food.x}, ${food.y})`);
         snake.score += FOOD_VALUE;
         console.log(`${snake.name} ate food. New score: ${snake.score}`);
