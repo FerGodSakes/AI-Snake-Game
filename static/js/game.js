@@ -168,10 +168,6 @@ function update() {
     checkCollisions(player1);
     checkCollisions(player2);
 
-    if (player1.score < 0 || player2.score < 0) {
-        endGame();
-    }
-
     draw();
 }
 
@@ -342,6 +338,13 @@ function checkCollisions(snake) {
     console.log(`Checking collisions for ${snake.name}`);
     const head = snake.body[0];
 
+    // Check if score is below 0
+    if (snake.score < 0) {
+        console.log(`${snake.name}'s score dropped below 0. Ending game.`);
+        endGame();
+        return; // Exit the function to prevent further checks
+    }
+
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
         snake.score = Math.max(0, snake.score - COLLISION_PENALTY);
@@ -475,7 +478,14 @@ function changeGameMode() {
 // End game
 function endGame() {
     clearInterval(gameLoop);
-    const winner = player1.score > player2.score ? player1.name : (player2.score > player1.score ? player2.name : "It's a tie");
+    let winner;
+    if (player1.score < 0) {
+        winner = player2.name;
+    } else if (player2.score < 0) {
+        winner = player1.name;
+    } else {
+        winner = player1.score > player2.score ? player1.name : (player2.score > player1.score ? player2.name : "It's a tie");
+    }
     console.log('Game over. Winner:', winner);
     document.getElementById('winner').innerHTML = winner === "It's a tie" ? "It's a tie!" : `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
