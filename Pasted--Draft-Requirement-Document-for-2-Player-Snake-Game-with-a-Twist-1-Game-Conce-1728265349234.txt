@@ -1,0 +1,111 @@
+### Draft Requirement Document for "2-Player Snake Game with a Twist"
+
+---
+
+#### 1. **Game Concept**
+- **Title**: 2-Player Snake Game with a Twist
+- **Summary**: A modern take on the classic "Snake Game" where two snakes compete to get food. One player can control their snake via keyboard, while the second snake can be controlled by either an AI. Each time a snake eats food, it gains points, grows longer, and moves faster. The game ends when one snake's score drops below zero, making the other snake the winner.
+
+---
+
+#### 2. **Game Mechanics**
+- **Food Mechanics**:
+  - When a snake eats food, it gains:
+    - **+1 Point**.
+    - **Increased Length**.
+    - **Increased Speed**.
+  - The food appears randomly on the game map.
+
+- **Collision Mechanics**:
+  - **Negative Events**:
+    - **Touching Self**: Deduct **3 points**.
+    - **Touching the Other Snake**: Deduct **3 points**.
+    - **Touching the Arena Wall**: Deduct **3 points**.
+  - If a snake's **score drops below 0**, it dies, and the **opponent wins**.
+
+- **Scoring & Game End**:
+  - Each snake starts at **0 points**.
+  - **Goal**: Gain the highest score while avoiding losing points.
+
+---
+
+#### 3. **Player Interactions**
+- **Controls**:
+  - **Human Player**:
+    - The snake is controlled via **keyboard keys**.
+    - Suggested keys:
+      - **Player 1**: Arrow keys for **up, down, left, right**.
+- **AI Control**:
+  - One player can be controlled by a **computer** opponent, and there's also a mode where **computer vs. computer** is possible.
+
+---
+
+#### 4. **Game Modes**
+- **Game Modes Available**:
+  1. **Human vs. Computer**.
+  2. **Computer vs. Computer**.
+
+---
+
+#### 5. **Graphics & User Interface**
+- **Visual Style**:
+  - Classic retro **pixel art** style, similar to the original Snake game.
+  - **Arena**:
+    - Simple bordered rectangle, representing the playable area.
+  - **Snakes**:
+    - Different colors for each player snake (e.g., **Player 1: Green**, **Player 2: Red**).
+  - **Food**:
+    - Simple representation, like a **pixel block** or a **fruit** icon.
+
+- **User Interface Elements**:
+  - **Score Display**: Each player’s score shown at the top or side of the game screen.
+  - **Game Over Message**: Clear indication of the winner when the game ends.
+  - **Pause Button**: A button to **pause** and **resume** the game.
+  - **Restart Button**: A button to **restart** the game without refreshing the page.
+  - **Speed Settings**: A menu or slider to adjust the **initial speed** of the snakes.
+
+---
+
+#### 6. **Game Levels & Difficulty**
+- **Levels**: The game has **one level** (a static arena).
+- **Increasing Difficulty**:
+  - As snakes eat food, they:
+    - **Grow in length**.
+    - **Move faster**, increasing the challenge.
+  - **Adjustable Difficulty Settings**: Players can set the **initial difficulty** level (e.g., easy, medium, hard).
+
+---
+
+#### 7. **Sound & Music**
+- **Background Music**: Simple retro loop that matches the **classic arcade** feel.
+- **Sound Effects**:
+  - **Eating Food**: A small positive sound (e.g., "ding").
+  - **Collision (Negative Event)**: A distinctive sound indicating **point deduction** or **game over**.
+  - **Pause/Resume**: A sound to indicate when the game is paused or resumed.
+  - **Game Over**: A unique sound to indicate the end of the game.
+
+---
+
+#### 8. **Technical Specifications**
+- **Platform**: Browser-based, compatible with Replit's hosting environment.
+- **Technology**:
+  - Suggested languages: **JavaScript** and **HTML/CSS** for game graphics and logic.
+  - Use of a **game library** such as **p5.js** for graphics handling.
+
+---
+
+#### 9. **Multiplayer & AI Features**
+- **Multiplayer**:
+  - Local multiplayer is **not available**.
+- **AI Player**:
+  - Implement a **basic AI** to control the second snake if only one human is playing.
+  - **AI Logic**: Simple pathfinding to chase food while avoiding collisions.
+
+---
+
+#### 10. **Additional Features**
+- **Pause Game**: Ability to **pause** and **resume** the game.
+- **Restart Game**: Option to **restart** without refreshing the page.
+- **Game Speed Settings**: Adjustable **initial speed** settings.
+- **Adjustable Difficulty**: Players can select different difficulty levels before starting the game.
+- **High Score Tracking**: Track and display the **highest score** achieved across game sessions.
