@@ -204,55 +204,119 @@ function moveSnake(snake) {
     }
 }
 
+// Pathfinding algorithm (Breadth-First Search)
+function findPath(start, goal, obstacles) {
+    const queue = [[start]];
+    const visited = new Set();
+
+    while (queue.length > 0) {
+        const path = queue.shift();
+        const pos = path[path.length - 1];
+
+        if (pos.x === goal.x && pos.y === goal.y) {
+            return path;
+        }
+
+        if (!visited.has(`${pos.x},${pos.y}`)) {
+            visited.add(`${pos.x},${pos.y}`);
+
+            const directions = [
+                {x: 0, y: -GRID_SIZE}, // up
+                {x: 0, y: GRID_SIZE},  // down
+                {x: -GRID_SIZE, y: 0}, // left
+                {x: GRID_SIZE, y: 0}   // right
+            ];
+
+            for (const dir of directions) {
+                const next = {x: pos.x + dir.x, y: pos.y + dir.y};
+                if (!isCollision(next, obstacles)) {
+                    queue.push([...path, next]);
+                }
+            }
+        }
+    }
+
+    return null; // No path found
+}
+
 // Update AI player
 function updateAI(aiSnake) {
     const head = aiSnake.body[0];
     console.log(`AI ${aiSnake.name} current position: (${head.x}, ${head.y}), food at: (${food.x}, ${food.y})`);
 
-    // Get all possible directions
-    const directions = ['up', 'down', 'left', 'right'];
+    const otherSnake = aiSnake === player1 ? player2 : player1;
+    const obstacles = [...aiSnake.body.slice(1), ...otherSnake.body];
 
-    // Calculate distances to food for each direction
-    const distances = directions.map(dir => {
-        const nextHead = getNextPosition(aiSnake, dir);
-        return {
-            direction: dir,
-            distance: Math.abs(nextHead.x - food.x) + Math.abs(nextHead.y - food.y),
-            collision: isCollision(nextHead, aiSnake)
-        };
-    });
+    // Try to find a path to the food
+    const path = findPath(head, food, obstacles);
 
-    // Sort directions by distance (ascending) and collision (false first)
-    distances.sort((a, b) => {
-        if (a.collision !== b.collision) {
-            return a.collision ? 1 : -1;
+    if (path && path.length > 1) {
+        // Path to food found, follow it
+        const nextMove = path[1];
+        if (nextMove.x < head.x) aiSnake.direction = 'left';
+        else if (nextMove.x > head.x) aiSnake.direction = 'right';
+        else if (nextMove.y < head.y) aiSnake.direction = 'up';
+        else if (nextMove.y > head.y) aiSnake.direction = 'down';
+    } else {
+        // No clear path to food, focus on survival
+        const safeDirections = ['up', 'down', 'left', 'right'].filter(dir => {
+            const nextHead = getNextPosition(aiSnake, dir);
+            return !isCollision(nextHead, obstacles);
+        });
+
+        if (safeDirections.length > 0) {
+            // Occasionally make a random move for unpredictability
+            if (Math.random() < 0.1) {
+                aiSnake.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+            } else {
+                // Choose the direction that leads to the most open space
+                const openSpaces = safeDirections.map(dir => {
+                    const nextHead = getNextPosition(aiSnake, dir);
+                    return countOpenSpaces(nextHead, obstacles);
+                });
+                const maxOpenSpace = Math.max(...openSpaces);
+                const bestDirections = safeDirections.filter((_, index) => openSpaces[index] === maxOpenSpace);
+                aiSnake.direction = bestDirections[Math.floor(Math.random() * bestDirections.length)];
+            }
         }
-        return a.distance - b.distance;
-    });
-
-    // Choose the best direction (closest to food without collision)
-    const bestDirection = distances[0].direction;
-
-    // Update snake direction
-    aiSnake.direction = bestDirection;
+        // If no safe directions, keep current direction (will likely result in game over)
+    }
 
     console.log(`AI ${aiSnake.name} chose direction: ${aiSnake.direction}`);
 
     // Move the snake
-    const nextHead = getNextPosition(aiSnake);
-    aiSnake.body.unshift(nextHead);
-    
-    // Check if food is eaten
-    if (nextHead.x === food.x && nextHead.y === food.y) {
-        aiSnake.score += FOOD_VALUE;
-        console.log(`${aiSnake.name} ate food. New score: ${aiSnake.score}`);
-        createFood();
-        gameSpeed = Math.min(gameSpeed + 0.5, 10);
-        clearInterval(gameLoop);
-        startGameLoop();
-    } else {
-        aiSnake.body.pop();
+    moveSnake(aiSnake);
+}
+
+// Helper function to count open spaces in a given direction
+function countOpenSpaces(start, obstacles, depth = 5) {
+    let count = 0;
+    let current = start;
+    const visited = new Set();
+
+    for (let i = 0; i < depth; i++) {
+        if (isCollision(current, obstacles) || visited.has(`${current.x},${current.y}`)) {
+            break;
+        }
+        count++;
+        visited.add(`${current.x},${current.y}`);
+
+        const directions = [
+            {x: 0, y: -GRID_SIZE}, // up
+            {x: 0, y: GRID_SIZE},  // down
+            {x: -GRID_SIZE, y: 0}, // left
+            {x: GRID_SIZE, y: 0}   // right
+        ];
+
+        for (const dir of directions) {
+            const next = {x: current.x + dir.x, y: current.y + dir.y};
+            if (!isCollision(next, obstacles) && !visited.has(`${next.x},${next.y}`)) {
+                count += countOpenSpaces(next, obstacles, depth - 1);
+            }
+        }
     }
+
+    return count;
 }
 
 // Helper function to get next position
@@ -314,21 +378,14 @@ function resetSnake(snake) {
     console.log(`${snake.name} reset. New position:`, snake.body[0]);
 }
 
-// Check if a position collides with a snake
-function isCollision(position, snake) {
+// Check if a position collides with a snake or wall
+function isCollision(position, obstacles) {
     if (position.x < 0 || position.x >= CANVAS_WIDTH || position.y < 0 || position.y >= CANVAS_HEIGHT) {
         return true;
     }
 
-    for (const segment of snake.body) {
-        if (position.x === segment.x && position.y === segment.y) {
-            return true;
-        }
-    }
-
-    const otherSnake = snake === player1 ? player2 : player1;
-    for (const segment of otherSnake.body) {
-        if (position.x === segment.x && position.y === segment.y) {
+    for (const obstacle of obstacles) {
+        if (position.x === obstacle.x && position.y === obstacle.y) {
             return true;
         }
     }
