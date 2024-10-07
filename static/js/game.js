@@ -16,6 +16,7 @@ let gameSpeed = 5;
 
 // Initialize game
 function init() {
+    console.log('Initializing game...');
     canvas = document.getElementById('gameCanvas');
     ctx = canvas.getContext('2d');
     canvas.width = CANVAS_WIDTH;
@@ -24,6 +25,9 @@ function init() {
     // Initialize players
     player1 = createSnake(CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'green', 'right');
     player2 = createSnake(3 * CANVAS_WIDTH / 4, CANVAS_HEIGHT / 2, 'red', 'left');
+
+    console.log('Player 1 initial state:', player1);
+    console.log('Player 2 initial state:', player2);
 
     // Create initial food
     createFood();
@@ -35,8 +39,10 @@ function init() {
     document.getElementById('playAgainBtn').addEventListener('click', restartGame);
     document.getElementById('speedSlider').addEventListener('input', updateGameSpeed);
 
+    console.log('Event listeners set up');
+
     // Start game loop
-    gameLoop = setInterval(update, 1000 / gameSpeed);
+    startGameLoop();
 }
 
 // Create snake object
@@ -61,10 +67,12 @@ function createFood() {
         x: Math.floor(Math.random() * (CANVAS_WIDTH / GRID_SIZE)) * GRID_SIZE,
         y: Math.floor(Math.random() * (CANVAS_HEIGHT / GRID_SIZE)) * GRID_SIZE
     };
+    console.log('New food created at:', food);
 }
 
 // Handle keyboard input
 function handleKeyPress(e) {
+    console.log('Key pressed:', e.key);
     switch (e.key) {
         case 'ArrowUp':
             if (player1.direction !== 'down') player1.direction = 'up';
@@ -79,6 +87,12 @@ function handleKeyPress(e) {
             if (player1.direction !== 'left') player1.direction = 'right';
             break;
     }
+}
+
+// Start game loop
+function startGameLoop() {
+    console.log('Starting game loop');
+    gameLoop = setInterval(update, 1000 / gameSpeed);
 }
 
 // Update game state
@@ -122,6 +136,7 @@ function moveSnake(snake) {
 
     if (head.x === food.x && head.y === food.y) {
         snake.score += FOOD_VALUE;
+        console.log(`${snake.color} snake ate food. New score:`, snake.score);
         createFood();
     } else {
         snake.body.pop();
@@ -191,6 +206,7 @@ function checkCollisions(snake) {
     // Wall collision
     if (head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT) {
         snake.score -= COLLISION_PENALTY;
+        console.log(`${snake.color} snake hit wall. New score:`, snake.score);
         resetSnake(snake);
     }
 
@@ -198,6 +214,7 @@ function checkCollisions(snake) {
     for (let i = 1; i < snake.body.length; i++) {
         if (head.x === snake.body[i].x && head.y === snake.body[i].y) {
             snake.score -= COLLISION_PENALTY;
+            console.log(`${snake.color} snake hit itself. New score:`, snake.score);
             resetSnake(snake);
             break;
         }
@@ -208,6 +225,7 @@ function checkCollisions(snake) {
     for (const segment of otherSnake.body) {
         if (head.x === segment.x && head.y === segment.y) {
             snake.score -= COLLISION_PENALTY;
+            console.log(`${snake.color} snake hit other snake. New score:`, snake.score);
             resetSnake(snake);
             break;
         }
@@ -223,6 +241,7 @@ function resetSnake(snake) {
         snake.body.push({ x: startX - i * GRID_SIZE, y: startY });
     }
     snake.direction = snake === player1 ? 'right' : 'left';
+    console.log(`${snake.color} snake reset. New position:`, snake.body[0]);
 }
 
 // Check if a position collides with a snake
@@ -278,10 +297,12 @@ function drawSnake(snake) {
 function togglePause() {
     isPaused = !isPaused;
     document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+    console.log('Game paused:', isPaused);
 }
 
 // Restart game
 function restartGame() {
+    console.log('Restarting game...');
     clearInterval(gameLoop);
     init();
     document.getElementById('game-over').classList.add('hidden');
@@ -290,14 +311,16 @@ function restartGame() {
 // Update game speed
 function updateGameSpeed() {
     gameSpeed = document.getElementById('speedSlider').value;
+    console.log('Game speed updated:', gameSpeed);
     clearInterval(gameLoop);
-    gameLoop = setInterval(update, 1000 / gameSpeed);
+    startGameLoop();
 }
 
 // End game
 function endGame() {
     clearInterval(gameLoop);
     const winner = player1.score >= 0 ? 'Player 1' : 'Player 2';
+    console.log('Game over. Winner:', winner);
     document.getElementById('winner').textContent = `${winner} wins!`;
     document.getElementById('game-over').classList.remove('hidden');
 }
