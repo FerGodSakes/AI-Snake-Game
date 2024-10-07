@@ -126,6 +126,10 @@ function update() {
     console.log('Updating game state');
     if (isPaused) return;
 
+    console.log(`Player 1 position: ${JSON.stringify(player1.body[0])}`);
+    console.log(`Player 2 position: ${JSON.stringify(player2.body[0])}`);
+    console.log(`Food position: ${JSON.stringify(food)}`);
+
     moveSnake(player1);
     moveSnake(player2);
 
@@ -172,9 +176,8 @@ function moveSnake(snake) {
         console.log(`${snake.name} is eating food at (${food.x}, ${food.y})`);
         snake.score += FOOD_VALUE;
         console.log(`${snake.name} ate food. New score: ${snake.score}`);
-        // Don't remove the last segment to make the snake grow
+        snake.body.push({}); // Add a new segment to make the snake grow
         createFood(); // Create new food immediately
-        // Increase speed
         gameSpeed = Math.min(gameSpeed + 0.5, 10);
         clearInterval(gameLoop);
         startGameLoop();
